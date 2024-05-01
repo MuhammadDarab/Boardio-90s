@@ -15,6 +15,7 @@ section {
     /* background-image: url('hexagons.png'); */
     background-position: right;
     background-size: cover;
+    overflow: hidden;
 }
 
 .shadow-90s {

@@ -1,27 +1,16 @@
 const express = require("express");
 const cors = require("cors");
-const socket = require('socket.io');
 require("dotenv").config();
+let intervalId;
 
 const app = express();
-
 let tickets = [];
-
-const allowedOrigins = ['http://localhost:5173'];
 
 // Middleware
 app.use(express.json()); // Apply body-parser for JSON requests
 app.use(express.urlencoded({ extended: true })); // Apply body-parser for URL-encoded requests
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*"); // Allow requests from any origin
-  next();
-});
-app.use(cors({
-  origin: 'http://localhost:5173/', // Replace with your allowed origin
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], // Specify allowed HTTP methods
-  allowedHeaders: ['Content-Type', 'Access-Control-Allow-Origin'], // Specify allowed headers
-  optionsSuccessStatus: 200 // Specify the status code for successful preflight requests
-}));
+app.use(cors());
+
 // Start the server
 const port = process.env.PORT || 8000;
 const server = app.listen(port, () => {
@@ -29,22 +18,45 @@ const server = app.listen(port, () => {
 });
 
 // Initialize Socket.IO
-const io = socket(server);
-let connectedUsers = 0;
+let connectedUsers = [];
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["my-custom-header"],
+    transports: ["websocket", "polling"],
+    credentials: true,
+  },
+});
+
 
 // Socket.IO events
 io.on("connection", (socket) => {
-  connectedUsers++;
-  console.log("A User Connected, Total Users are", connectedUsers);
-  socket.on("user:mouse-move", (position) => {
-    // socket.broadcast.emit("user:mouse-move", position)
-    io.emit("user:mouse-move", position)
+  clearInterval(intervalId)
+  socket.on("user:join", (...args) => {
+    socket.emit("user:introduce-others", { connectedUsers });
+    socket.broadcast.emit("user:join", ...args);
+    console.clear();
+    connectedUsers.push(...args);
+    console.table(connectedUsers);
+  });
+
+  socket.on("user:mouse-move", (...args) => {
+    console.clear();
+    console.table(connectedUsers);
+    socket.broadcast.emit("user:mouse-move", ...args)
+  });
+
+  socket.on("user:left", (...args) => {
+    socket.broadcast.emit("user:left", ...args)
+    console.clear();
+    connectedUsers = connectedUsers.filter(user => user.id != args[0].id);
+    console.table(connectedUsers);
   });
 
   // Handle disconnection
-  socket.on("disconnect", () => {
-    console.log("A client disconnected");
-    connectedUsers--;
+  socket.on("disconnect", (...args) => {
+
   });
 });
 
