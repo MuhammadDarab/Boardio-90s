@@ -2,7 +2,6 @@ import React, { Suspense, useEffect, useState } from "react";
 import "./App.css";
 import Modal from "./components/modal";
 import Toast from "./components/toast";
-import io from 'socket.io-client';
 import { ADDRESS, playClickSound } from "./utils/constants";
 
 // Lazy loading components
@@ -21,22 +20,6 @@ function App() {
     title: "",
     description: "",
   });
-
-  useEffect(() => {
-    const socket = io('http://192.168.0.112:8001');
-
-    socket.on('user:mouse-move', (mousePosition) => {
-      console.log('user moved their mouse', mousePosition)
-    });
-
-    window.addEventListener('mousemove', ({clientX, clientY}) => {
-      socket.emit('user:mouse-move', {clientX, clientY});
-    })
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
 
   function getTickets() {
     fetch(ADDRESS + "/get-tickets")
@@ -105,6 +88,7 @@ function App() {
       Screen = (
         <Suspense fallback={Loader}>
           <LazyHome
+            showToast={showToast}
             router={router}
             handleOpenTicketModal={handleOpenTicketModal}
             todos={tickets}

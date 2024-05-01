@@ -25,7 +25,7 @@ const CreateBoard = ({ router }) => {
           {boards.map((board, index) => (
             <div
               key={index}
-              onClick={() => new Audio("click.mp3").play()}
+              onClick={() => new Audio("click_creatorassets.com").play()}
               className="m-[5px]  text-[14px] shadow-90s-btn border-[0.5px] border-retro-green px-4 py-2 flex justify-center items-center w-fit"
               style={{ boxShadow: `5px 5px ${board.cursorColor}` }}
             >
@@ -44,7 +44,7 @@ const CreateBoard = ({ router }) => {
             <input className='w-[211px] py-2 px-2 shadow-90s-input border-[0.5px] border-retro-green' placeholder='Board name here please..'/>
         </center>
         <div
-            onClick={() => new Audio("click.mp3").play()}
+            onClick={() => new Audio("click_creatorassets.com").play()}
             className="bg-[#D986D9] mt-4 ml-auto mr-auto align-center m-[5px]  text-[14px] shadow-90s-btn border-[0.5px] border-retro-green px-4 py-2 flex justify-center items-center w-fit"
         >
             <div className='text-white font-medium' onClick={() => router.push('/home')}>JUMP IN!!</div>
