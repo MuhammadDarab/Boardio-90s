@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ADDRESS, playClickSound } from "../../utils/constants";
+import { ADDRESS } from "../../utils/constants";
 import "./index.css";
 
 const Modal = ({

@@ -47,6 +47,23 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("user:mouse-move", ...args)
   });
 
+  socket.on("user:entered-hovering-ticket", (...args) => {
+    socket.broadcast.emit("user:entered-hovering-ticket", ...args)
+  });
+
+  socket.on("user:left-hovering-ticket", (...args) => {
+    socket.broadcast.emit("user:left-hovering-ticket", ...args)
+  });
+
+  // Upon Ticket interact!
+  socket.on("user:ticket-opened", (...args) => {
+    socket.broadcast.emit("user:ticket-opened", ...args)
+  });
+
+  socket.on("user:ticket-closed", (...args) => {
+    socket.broadcast.emit("user:ticket-closed", ...args)
+  });
+
   socket.on("user:left", (...args) => {
     socket.broadcast.emit("user:left", ...args)
     console.clear();
@@ -82,6 +99,7 @@ app.post("/create-ticket", (req, res) => {
         _id: tickets.length + 1,
         title,
         description,
+        isBeingHovered: false
       });
       res.send(200);
     } else {

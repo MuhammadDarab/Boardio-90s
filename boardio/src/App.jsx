@@ -20,7 +20,6 @@ function App() {
     title: "",
     description: "",
   });
-
   function getTickets() {
     fetch(ADDRESS + "/get-tickets")
       .then((x) => x.json())
