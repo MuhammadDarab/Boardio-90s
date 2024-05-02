@@ -20,8 +20,11 @@ const Home = ({ todos: todosVal, handleOpenTicketModal, showToast }) => {
     setCurrentId(v4());
     setCurrentColor(COLORS[Math.trunc(Math.random() * COLORS.length)]);
     setCurrentName(MALE_NAMES[Math.trunc(Math.random() * MALE_NAMES.length)]);
-    setTodos(todosVal);
   }, []);
+
+  useEffect(() => {
+    setTodos(todosVal);
+  }, [todosVal])
 
   function createNameTag({ id, color, name, nameTagRef, isHidden }) {
     return (

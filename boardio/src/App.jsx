@@ -24,7 +24,10 @@ function App() {
   function getTickets() {
     fetch(BACKEND_ADDRESS + "/get-tickets")
       .then((x) => x.json())
-      .then((ticketsList) => setTickets(ticketsList));
+      .then((ticketsList) => {
+        debugger;
+        setTickets(ticketsList);
+      });
   }
 
   function showToast(message) {
