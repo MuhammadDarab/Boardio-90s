@@ -1,15 +1,6 @@
 import './index.css';
-
-const boards = [
-    { name: "Machomon QA Logs", cursorColor: 'red' },
-    { name: "Devkit", cursorColor: 'orange' },
-    { name: "Robust Arena", cursorColor: 'indigo' },
-    { name: "Mimisi", cursorColor: 'black' },
-    { name: "Donrie", cursorColor: 'gray' },
-    { name: "Mitochondria Lobelsi", cursorColor: 'pink' },
-    { name: "E-Learner Kits", cursorColor: 'green' }
-];
-
+import { playClickSound } from '../../utils/utility';
+import { BOARDS_DUMMY_NAME } from '../../utils/constants'
 
 const CreateBoard = ({ router }) => {
   return (
@@ -22,10 +13,10 @@ const CreateBoard = ({ router }) => {
           to invite others so its not lonley..
         </div>
         <div className="flex justify-left flex-wrap max-w-72">
-          {boards.map((board, index) => (
+          {BOARDS_DUMMY_NAME.map((board, index) => (
             <div
               key={index}
-              onClick={() => new Audio("click_creatorassets.com.mp3").play()}
+              onClick={() => playClickSound()}
               className="m-[5px]  text-[14px] shadow-90s-btn border-[0.5px] border-retro-green px-4 py-2 flex justify-center items-center w-fit"
               style={{ boxShadow: `5px 5px ${board.cursorColor}` }}
             >
@@ -44,7 +35,7 @@ const CreateBoard = ({ router }) => {
             <input className='w-[211px] py-2 px-2 shadow-90s-input border-[0.5px] border-retro-green' placeholder='Board name here please..'/>
         </center>
         <div
-            onClick={() => new Audio("click_creatorassets.com.mp3").play()}
+            onClick={() => playClickSound()}
             className="bg-[#D986D9] mt-4 ml-auto mr-auto align-center m-[5px]  text-[14px] shadow-90s-btn border-[0.5px] border-retro-green px-4 py-2 flex justify-center items-center w-fit"
         >
             <div className='text-white font-medium' onClick={() => router.push('/home')}>JUMP IN!!</div>

@@ -2,7 +2,8 @@ import React, { Suspense, useEffect, useState } from "react";
 import "./App.css";
 import Modal from "./components/modal";
 import Toast from "./components/toast";
-import { ADDRESS, playClickSound } from "./utils/constants";
+import { BACKEND_ADDRESS } from "./utils/constants";
+import { playClickSound } from "./utils/utility";
 
 // Lazy loading components
 const LazyHome = React.lazy(() => import("./pages/home"));
@@ -21,7 +22,7 @@ function App() {
     description: "",
   });
   function getTickets() {
-    fetch(ADDRESS + "/get-tickets")
+    fetch(BACKEND_ADDRESS + "/get-tickets")
       .then((x) => x.json())
       .then((ticketsList) => setTickets(ticketsList));
   }

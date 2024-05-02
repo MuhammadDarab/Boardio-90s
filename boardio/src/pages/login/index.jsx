@@ -1,5 +1,5 @@
 import "./index.css";
-
+import { playClickSound } from '../../utils/utility'
 const Login = ({ router }) => {
 
   return (
@@ -17,7 +17,7 @@ const Login = ({ router }) => {
         </center>
         <div className="flex justify-center flex-col">
           <div onClick={() => {
-            new Audio('click_creatorassets.com.mp3').play();
+            playClickSound();
             router.push('/create-board')
           }} className=" text-[14px] shadow-90s-btn border-[0.5px] border-retro-green px-[2px] py-2 flex justify-center items-center">
             <div className="mr-3">

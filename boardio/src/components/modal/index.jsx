@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ADDRESS } from "../../utils/constants";
+import { BACKEND_ADDRESS } from "../../utils/constants";
 import "./index.css";
 
 const Modal = ({
@@ -57,7 +57,7 @@ const Modal = ({
               {ticketType == "Update" && (
                 <div className="m-2 w-fit shadow-90s-input border-[0.5px] border-retro-green px-2 py-1 mb-3 bg-red-400 text-white" onClick={() => {
                   if (modalData._id) {
-                    fetch(ADDRESS + "/delete-ticket", {
+                    fetch(BACKEND_ADDRESS + "/delete-ticket", {
                       method: "DELETE",
                       headers: {
                         "Content-Type": "application/json",
@@ -80,7 +80,7 @@ const Modal = ({
                 onClick={() => {
                   if (!((modalData.title === title && modalData.description === description) || (title.trim() == '') || (description.trim() == ''))) {
                     if (ticketType == 'Create') {
-                      fetch(ADDRESS + "/create-ticket", {
+                      fetch(BACKEND_ADDRESS + "/create-ticket", {
                         method: "POST",
                         headers: {
                           "Content-Type": "application/json",
@@ -97,7 +97,7 @@ const Modal = ({
                         showToast('Ticket created Successfully!');
                       });
                     } else if (ticketType == 'Update') {
-                      fetch(ADDRESS + "/update-ticket", {
+                      fetch(BACKEND_ADDRESS + "/update-ticket", {
                         method: "POST",
                         headers: {
                           "Content-Type": "application/json",

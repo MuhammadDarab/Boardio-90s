@@ -1,44 +1,10 @@
 import React, { useEffect, useState } from "react";
 import SocketUser from "../../utils/connections";
-import { playClickSound } from "../../utils/constants";
+import { playClickSound } from "../../utils/utility";
 import "./index.css";
 import { v4 } from "uuid";
 import { io } from "socket.io-client";
-
-// Tell the server that you have joined!
-const maleNames = [
-  "Muhammad",
-  "Ali",
-  "Omar",
-  "Hassan",
-  "Ahmed",
-  "Yusuf",
-  "Abdullah",
-  "Ibrahim",
-  "Mustafa",
-  "Abdul",
-  "Hamza",
-  "Khalid",
-  "Zaid",
-  "Tariq",
-  "Amir",
-  "Bilal",
-  "Nasir",
-  "Rashid",
-  "Sami",
-  "Zakariya",
-];
-const colors = [
-  "red",
-  "orange",
-  "green",
-  "blue",
-  "pink",
-  "purple",
-  "slate",
-  "aqua",
-  "lime",
-];
+import { COLORS, MALE_NAMES } from "../../utils/constants";
 
 const Home = ({ todos: todosVal, handleOpenTicketModal, showToast }) => {
   
@@ -52,8 +18,8 @@ const Home = ({ todos: todosVal, handleOpenTicketModal, showToast }) => {
   useEffect(() => {
     setSocket(io("http://192.168.0.112:8001"));
     setCurrentId(v4());
-    setCurrentColor(colors[Math.trunc(Math.random() * colors.length)]);
-    setCurrentName(maleNames[Math.trunc(Math.random() * maleNames.length)]);
+    setCurrentColor(COLORS[Math.trunc(Math.random() * COLORS.length)]);
+    setCurrentName(MALE_NAMES[Math.trunc(Math.random() * MALE_NAMES.length)]);
     setTodos(todosVal);
   }, []);
 
