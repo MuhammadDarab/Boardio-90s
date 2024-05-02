@@ -3,7 +3,7 @@ import SocketUser from "../../utils/connections";
 import { playClickSound } from "../../utils/constants";
 import "./index.css";
 import { v4 } from "uuid";
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
 
 // Tell the server that you have joined!
 const maleNames = [
@@ -41,20 +41,29 @@ const colors = [
 ];
 
 const Home = ({ todos: todosVal, handleOpenTicketModal, showToast }) => {
+  
+  const [currentId, setCurrentId] = useState([]);
+  const [currentColor, setCurrentColor] = useState("");
+  const [currentName, setCurrentName] = useState("");
+
   const [todos, setTodos] = useState([]);
   const [roomUsers, setRoomUsers] = useState([]);
   const [socket, setSocket] = useState(null);
   useEffect(() => {
     setSocket(io("http://192.168.0.112:8001"));
-  }, [])
-
-  useEffect(() => {
+    setCurrentId(v4());
+    setCurrentColor(colors[Math.trunc(Math.random() * colors.length)]);
+    setCurrentName(maleNames[Math.trunc(Math.random() * maleNames.length)]);
     setTodos(todosVal);
   }, []);
 
-  function createNameTag({ id, color, name, nameTagRef }) {
+  function createNameTag({ id, color, name, nameTagRef, isHidden }) {
     return (
-      <div className="absolute z-50" ref={nameTagRef}>
+      <div
+        style={{ opacity: isHidden ? "0" : "1" }}
+        className="absolute z-50"
+        ref={nameTagRef}
+      >
         <svg
           className="shaodow-90s-btn"
           width="17"
@@ -81,13 +90,10 @@ const Home = ({ todos: todosVal, handleOpenTicketModal, showToast }) => {
   }
 
   useEffect(() => {
-    debugger;
     if (socket && window.location.pathname == "/home") {
-      const currentId = v4();
-
       socket.emit("user:join", {
-        color: colors[Math.trunc(Math.random() * colors.length)],
-        name: maleNames[Math.trunc(Math.random() * maleNames.length)],
+        color: currentColor,
+        name: currentName,
         id: currentId,
       });
 
@@ -107,7 +113,6 @@ const Home = ({ todos: todosVal, handleOpenTicketModal, showToast }) => {
           todos.map((todo) => {
             if (Number(todo._id) != Number(id)) return todo;
             todo.isBeingHovered = true;
-            console.log('todo updated', todo);
             return todo;
           })
         )
@@ -119,7 +124,6 @@ const Home = ({ todos: todosVal, handleOpenTicketModal, showToast }) => {
           todos.map((todo) => {
             if (Number(todo._id) != Number(id)) return todo;
             todo.isBeingHovered = false;
-            console.log('todo updated', todo);
             return todo;
           })
         )
@@ -152,6 +156,45 @@ const Home = ({ todos: todosVal, handleOpenTicketModal, showToast }) => {
         )
       );
 
+      socket.on("user:ticket-opened", ({ ticketId, clickedBy }) => {
+        setTodos(
+          todos.map((todo) => {
+            if (todo._id != ticketId) return todo;
+            todo.hasBeenClicked = true;
+            todo.clickedBy = {
+              id: clickedBy.id,
+              color: clickedBy.color
+            }
+            return todo;
+          })
+        );
+        setRoomUsers((prevUsers) =>
+          prevUsers.filter((user) => {
+            if (user.id != clickedBy) return true;
+            user.dissolveNameTag();
+            return false;
+          })
+        );
+      });
+
+      socket.on("user:ticket-closed", ({ ticketId, clickedBy }) => {
+        setTodos(
+          todos.map((todo) => {
+            if (todo._id != ticketId) return todo;
+            todo.hasBeenClicked = false;
+            todo.clickedBy = {};
+            return todo;
+          })
+        );
+        setRoomUsers((prevUsers) =>
+          prevUsers.filter((user) => {
+            if (user.id != clickedBy) return true;
+            user.resolveNameTag();
+            return false;
+          })
+        );
+      });
+
       // Handle mouse move.
       window.addEventListener("mousemove", ({ clientX, clientY }) => {
         socket.emit("user:mouse-move", currentId, { clientX, clientY });
@@ -177,21 +220,39 @@ const Home = ({ todos: todosVal, handleOpenTicketModal, showToast }) => {
         <br />
         <hr />
         {todos.map((todo) => {
-          return <div
-            key={todo._id}
-            id={todo._id}
-            className={`border-[0.5px] border-retro-green retro-green p-2 ${todo.isBeingHovered ? 'shadow-90s-btn-hover' : 'shadow-90s-btn'} w-64 mt-4 max-w-64`}
-            onMouseEnter={(ev) => socket.emit("user:entered-hovering-ticket", {id: ev.target.id})}
-            onMouseLeave={(ev) => socket.emit("user:left-hovering-ticket", {id: ev.target.id})}
-            onClick={() => {
-              playClickSound();
-              handleOpenTicketModal(todo._id, "Update");
-              socket.emit('user:ticket-opened', { id: todo._id });
-            }}
-          >
-            <div className="mb-2 font-black line-clamp-4">{todo.title}</div>
-            <div className="text-xs line-clamp-6">{todo.description}</div>
-          </div>
+          return (
+            <div
+              key={todo._id}
+              id={todo._id}
+              className={`border-[0.5px] border-retro-green retro-green p-2 ${
+                todo.isBeingHovered ? "shadow-90s-btn-hover" : "shadow-90s-btn"
+              } w-64 mt-4 max-w-64 ${
+                todo.hasBeenClicked ? 'bg-' + todo.clickedBy.color + '-400' : ""
+              }`}
+              onMouseEnter={(ev) =>
+                socket.emit("user:entered-hovering-ticket", {
+                  id: ev.target.id,
+                })
+              }
+              onMouseLeave={(ev) =>
+                socket.emit("user:left-hovering-ticket", { id: ev.target.id })
+              }
+              onClick={() => {
+                playClickSound();
+                handleOpenTicketModal(todo._id, "Update");
+                socket.emit("user:ticket-opened", {
+                  ticketId: todo._id,
+                  clickedBy: {
+                    id: currentId,
+                    color: currentColor,
+                  },
+                });
+              }}
+            >
+              <div className="mb-2 font-black line-clamp-4">{todo.title}</div>
+              <div className="text-xs line-clamp-6">{todo.description}</div>
+            </div>
+          );
         })}
         {todos.length == 0 && (
           <div className="retro-green text-xs max-w-64">
@@ -212,8 +273,12 @@ const Home = ({ todos: todosVal, handleOpenTicketModal, showToast }) => {
           className="w-64 max-w-64 shadow-90s-btn mt-4 py-1 px-2 border-retro-green border-[0.5px] bg-gray-400 text-white flex justify-between items-center"
           key={"new-ticket"}
           id="0"
-          onMouseEnter={() => socket.emit("user:entered-hovering-ticket", { id: 0 })}
-          onMouseLeave={() => socket.emit("user:left-hovering-ticket", { id: 0 })}
+          onMouseEnter={() =>
+            socket.emit("user:entered-hovering-ticket", { id: 0 })
+          }
+          onMouseLeave={() =>
+            socket.emit("user:left-hovering-ticket", { id: 0 })
+          }
           onClick={(e) => {
             playClickSound();
             handleOpenTicketModal(null, "Create");

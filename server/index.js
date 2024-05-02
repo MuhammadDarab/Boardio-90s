@@ -36,14 +36,10 @@ io.on("connection", (socket) => {
   socket.on("user:join", (...args) => {
     socket.emit("user:introduce-others", { connectedUsers });
     socket.broadcast.emit("user:join", ...args);
-    console.clear();
     connectedUsers.push(...args);
-    console.table(connectedUsers);
   });
 
   socket.on("user:mouse-move", (...args) => {
-    console.clear();
-    console.table(connectedUsers);
     socket.broadcast.emit("user:mouse-move", ...args)
   });
 
@@ -66,9 +62,7 @@ io.on("connection", (socket) => {
 
   socket.on("user:left", (...args) => {
     socket.broadcast.emit("user:left", ...args)
-    console.clear();
     connectedUsers = connectedUsers.filter(user => user.id != args[0].id);
-    console.table(connectedUsers);
   });
 
   // Handle disconnection
@@ -134,10 +128,8 @@ app.post("/update-ticket", (req, res) => {
 app.delete("/delete-ticket", (req, res) => {
   try {
     const { ticketId } = req.body;
-    console.log('ticketId', ticketId);
     if (ticketId) {
       const updatedTickets = tickets.filter((ticket) => ticket._id !== ticketId);
-      console.log(tickets, updatedTickets)
       tickets = updatedTickets;
       res.send(200);
     } else {
