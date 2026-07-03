@@ -1,14 +1,4 @@
-export const BACKEND_ADDRESS = "http://localhost:8001";
-
-export const BOARDS_DUMMY_NAME = [
-  { name: "Machomon QA Logs", cursorColor: "red" },
-  { name: "Devkit", cursorColor: "orange" },
-  { name: "Robust Arena", cursorColor: "indigo" },
-  { name: "Mimisi", cursorColor: "black" },
-  { name: "Donrie", cursorColor: "gray" },
-  { name: "Mitochondria Lobelsi", cursorColor: "pink" },
-  { name: "E-Learner Kits", cursorColor: "green" },
-];
+export const BACKEND_ADDRESS = import.meta.env.VITE_BACKEND_ADDRESS || "http://localhost:8001";
 
 export const MALE_NAMES = [
   "Muhammad",
@@ -31,6 +21,19 @@ export const MALE_NAMES = [
   "Rashid",
   "Sami",
   "Zakariya",
+];
+
+export const STAMP_TYPES = [
+  { type: "urgent",    label: "URGENT",    emoji: "🔥", color: "crimson"     },
+  { type: "done",      label: "DONE",      emoji: "✅", color: "green"        },
+  { type: "bug",       label: "BUG",       emoji: "🐛", color: "orangered"   },
+  { type: "ship",      label: "SHIP IT",   emoji: "🚀", color: "royalblue"   },
+  { type: "idea",      label: "IDEA",      emoji: "💡", color: "goldenrod"   },
+  { type: "blocked",   label: "BLOCKED",   emoji: "🔒", color: "slategray"   },
+  { type: "quickwin",  label: "QUICK WIN", emoji: "⚡", color: "olive"        },
+  { type: "dead",      label: "DEAD END",  emoji: "💀", color: "gray"        },
+  { type: "review",    label: "REVIEW",    emoji: "👀", color: "teal"        },
+  { type: "costly",    label: "NEEDS $$$", emoji: "💸", color: "darkorange"  },
 ];
 
 export const COLORS = [

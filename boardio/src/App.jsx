@@ -4,6 +4,7 @@ import Modal from "./components/modal";
 import Toast from "./components/toast";
 import { BACKEND_ADDRESS } from "./utils/constants";
 import { playClickSound } from "./utils/utility";
+import { authFetch, getToken } from "./utils/auth";
 
 // Lazy loading components
 const LazyHome = React.lazy(() => import("./pages/home"));
@@ -20,14 +21,110 @@ function App() {
     _id: -1,
     title: "",
     description: "",
+    attachments: [],
+    stamps: [],
+    createdAt: null,
+    columnId: -1,
   });
+  const [boardName, setBoardName] = useState("");
+  const [columns, setColumns] = useState([]);
+  const [boards, setBoards] = useState([]);
+
   function getTickets() {
-    fetch(BACKEND_ADDRESS + "/get-tickets")
+    authFetch(BACKEND_ADDRESS + "/get-tickets")
       .then((x) => x.json())
       .then((ticketsList) => {
-        debugger;
         setTickets(ticketsList);
       });
+  }
+
+  function getBoard() {
+    authFetch(BACKEND_ADDRESS + "/get-board")
+      .then((x) => x.json())
+      .then((board) => setBoardName(board.name));
+  }
+
+  function getColumns() {
+    authFetch(BACKEND_ADDRESS + "/get-columns")
+      .then((x) => x.json())
+      .then((columnsList) => setColumns(columnsList));
+  }
+
+  function handleUpdateBoardName(name) {
+    return authFetch(BACKEND_ADDRESS + "/update-board-name", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    }).then(() => {
+      setBoardName(name);
+      showToast("Board name updated!");
+    });
+  }
+
+  function getBoards() {
+    return authFetch(BACKEND_ADDRESS + "/get-boards")
+      .then((x) => x.json())
+      .then((boardsList) => setBoards(boardsList));
+  }
+
+  function handleCreateBoard(name) {
+    return authFetch(BACKEND_ADDRESS + "/create-board", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    })
+      .then((x) => x.json())
+      .then((createdBoard) => {
+        setBoardName(createdBoard.name);
+        return getBoards();
+      });
+  }
+
+  function handleSelectBoard(boardId) {
+    return authFetch(BACKEND_ADDRESS + "/select-board", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ boardId }),
+    }).then(() => {
+      const selected = boards.find((b) => b._id === boardId);
+      if (selected) setBoardName(selected.name);
+    });
+  }
+
+  function handleCreateColumn(name) {
+    return authFetch(BACKEND_ADDRESS + "/create-column", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    }).then(() => {
+      getColumns();
+      showToast("Column created!");
+    });
+  }
+
+  function handleDeleteColumn(columnId) {
+    return authFetch(BACKEND_ADDRESS + "/delete-column", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ columnId }),
+    }).then(() => {
+      getColumns();
+      getTickets();
+      showToast("Column deleted!");
+    });
+  }
+
+  function handleReorderColumns(columnIds) {
+    setColumns((prevColumns) =>
+      columnIds
+        .map((id) => prevColumns.find((column) => column._id === id))
+        .filter(Boolean)
+    );
+    return authFetch(BACKEND_ADDRESS + "/reorder-columns", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ columnIds }),
+    });
   }
 
   function showToast(message) {
@@ -36,7 +133,7 @@ function App() {
     setIsToastOpen(true);
   }
 
-  function handleOpenTicketModal(key, type) {
+  function handleOpenTicketModal(key, type, columnId) {
     setTicketType(type);
     if (type == "Update") {
       const selectedTicket = tickets.find((ticket) => ticket._id === key);
@@ -44,12 +141,20 @@ function App() {
         _id: selectedTicket._id,
         title: selectedTicket.title,
         description: selectedTicket.description,
+        attachments: selectedTicket.attachments || [],
+        stamps: selectedTicket.stamps || [],
+        createdAt: selectedTicket.createdAt,
+        columnId: selectedTicket.columnId,
       });
     } else {
       setModalData({
         _id: -1,
         title: "",
         description: "",
+        attachments: [],
+        stamps: [],
+        createdAt: null,
+        columnId,
       });
     }
     setIsModalOpen(true);
@@ -59,7 +164,17 @@ function App() {
     setIsToastOpen(false);
   }
 
-  useEffect(getTickets, []);
+  useEffect(() => {
+    if (!getToken() && window.location.pathname !== "/login") {
+      window.location.pathname = "/login";
+      return;
+    }
+    if (window.location.pathname === "/login") return;
+    getTickets();
+    getBoard();
+    getColumns();
+    getBoards();
+  }, []);
 
   const router = {
     push: (route) => {
@@ -83,7 +198,12 @@ function App() {
     case "/create-board":
       Screen = (
         <Suspense fallback={Loader}>
-          <LazyCreateBoard router={router} />
+          <LazyCreateBoard
+            router={router}
+            boards={boards}
+            handleCreateBoard={handleCreateBoard}
+            handleSelectBoard={handleSelectBoard}
+          />
         </Suspense>
       );
       break;
@@ -95,6 +215,12 @@ function App() {
             router={router}
             handleOpenTicketModal={handleOpenTicketModal}
             todos={tickets}
+            boardName={boardName}
+            columns={columns}
+            handleUpdateBoardName={handleUpdateBoardName}
+            handleCreateColumn={handleCreateColumn}
+            handleDeleteColumn={handleDeleteColumn}
+            handleReorderColumns={handleReorderColumns}
           />
         </Suspense>
       );
