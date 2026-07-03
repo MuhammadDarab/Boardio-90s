@@ -6,6 +6,11 @@ import { v4 } from "uuid";
 import { io } from "socket.io-client";
 import { BACKEND_ADDRESS, COLORS, MALE_NAMES, STAMP_TYPES } from "../../utils/constants";
 
+function resolveUrl(url) {
+  if (!url) return url;
+  return url.startsWith("http") ? url : BACKEND_ADDRESS + url;
+}
+
 function formatTicketDate(dateString) {
   if (!dateString) return null;
   const date = new Date(dateString);
@@ -545,7 +550,7 @@ const Home = ({
                         <div className="relative mb-2">
                           {mediaAttachments[imageIndex].type === "video" ? (
                             <video
-                              src={BACKEND_ADDRESS + mediaAttachments[imageIndex].url}
+                              src={resolveUrl(mediaAttachments[imageIndex].url)}
                               className="w-full max-h-32 object-cover border-[0.5px] border-retro-green cursor-pointer"
                               autoPlay
                               loop
@@ -558,7 +563,7 @@ const Home = ({
                             />
                           ) : (
                             <img
-                              src={BACKEND_ADDRESS + mediaAttachments[imageIndex].url}
+                              src={resolveUrl(mediaAttachments[imageIndex].url)}
                               alt={todo.title}
                               className="w-full max-h-32 object-cover border-[0.5px] border-retro-green cursor-pointer"
                               onClick={(ev) => {
@@ -687,13 +692,13 @@ const Home = ({
             if (ghostMedia.length === 0) return null;
             return ghostMedia[0].type === "video" ? (
               <video
-                src={BACKEND_ADDRESS + ghostMedia[0].url}
+                src={resolveUrl(ghostMedia[0].url)}
                 muted
                 className="w-full max-h-32 object-cover border-[0.5px] border-retro-green mb-2"
               />
             ) : (
               <img
-                src={BACKEND_ADDRESS + ghostMedia[0].url}
+                src={resolveUrl(ghostMedia[0].url)}
                 alt={dragGhost.todo.title}
                 className="w-full max-h-32 object-cover border-[0.5px] border-retro-green mb-2"
               />
@@ -711,7 +716,7 @@ const Home = ({
         >
           {lightboxAttachment.type === "video" ? (
             <video
-              src={BACKEND_ADDRESS + lightboxAttachment.url}
+              src={resolveUrl(lightboxAttachment.url)}
               controls
               autoPlay
               className="max-h-[85vh] max-w-[85vw] object-contain"
@@ -719,7 +724,7 @@ const Home = ({
             />
           ) : (
             <img
-              src={BACKEND_ADDRESS + lightboxAttachment.url}
+              src={resolveUrl(lightboxAttachment.url)}
               alt="Full size attachment"
               className="max-h-[85vh] max-w-[85vw] object-contain"
             />
