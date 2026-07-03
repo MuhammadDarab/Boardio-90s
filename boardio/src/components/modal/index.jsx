@@ -9,6 +9,11 @@ function sameAttachments(a, b) {
   return a.every((attachment, index) => attachment.url === (b[index] && b[index].url));
 }
 
+function resolveUrl(url) {
+  if (!url) return url;
+  return url.startsWith("http") ? url : BACKEND_ADDRESS + url;
+}
+
 function toMonthInputValue(dateString) {
   const date = dateString ? new Date(dateString) : new Date();
   if (isNaN(date.getTime())) return "";
@@ -206,7 +211,7 @@ const Modal = ({
                   <div key={attachment.url + index} className="relative w-16 h-16">
                     {attachment.type === "image" && (
                       <img
-                        src={BACKEND_ADDRESS + attachment.url}
+                        src={resolveUrl(attachment.url)}
                         alt={attachment.name || "Ticket attachment thumbnail"}
                         className="w-16 h-16 object-cover border-[0.5px] border-retro-green cursor-pointer"
                         onClick={() => setLightboxAttachment(attachment)}
@@ -214,7 +219,7 @@ const Modal = ({
                     )}
                     {attachment.type === "video" && (
                       <video
-                        src={BACKEND_ADDRESS + attachment.url}
+                        src={resolveUrl(attachment.url)}
                         muted
                         className="w-16 h-16 object-cover border-[0.5px] border-retro-green cursor-pointer"
                         onClick={() => setLightboxAttachment(attachment)}
@@ -224,7 +229,7 @@ const Modal = ({
                       <div
                         className="w-16 h-16 flex flex-col items-center justify-center gap-1 border-[0.5px] border-retro-green cursor-pointer bg-gray-100 px-1"
                         title={attachment.name}
-                        onClick={() => window.open(BACKEND_ADDRESS + attachment.url, "_blank")}
+                        onClick={() => window.open(resolveUrl(attachment.url), "_blank")}
                       >
                         <div className="text-xl">&#128196;</div>
                         <div className="text-[9px] text-center line-clamp-2 break-all">
@@ -393,7 +398,7 @@ const Modal = ({
           >
             {lightboxAttachment.type === "video" ? (
               <video
-                src={BACKEND_ADDRESS + lightboxAttachment.url}
+                src={resolveUrl(lightboxAttachment.url)}
                 controls
                 autoPlay
                 className="max-h-[85vh] max-w-[85vw] object-contain"
@@ -426,7 +431,7 @@ const Modal = ({
               </div>
             ) : (
               <img
-                src={BACKEND_ADDRESS + lightboxAttachment.url}
+                src={resolveUrl(lightboxAttachment.url)}
                 alt="Full size attachment"
                 className="max-h-[85vh] max-w-[85vw] object-contain"
               />

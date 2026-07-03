@@ -6,20 +6,19 @@ const fs = require("fs");
 const crypto = require("crypto");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
+const cloudinary = require("cloudinary").v2;
 require("dotenv").config();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 let intervalId;
 
 const app = express();
 
-const uploadsDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadsDir),
-    filename: (req, file, cb) =>
-      cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname)}`),
-  }),
-});
+const upload = multer({ storage: multer.memoryStorage() });
 
 function attachmentTypeFromMime(mimetype) {
   if (mimetype && mimetype.startsWith("image/")) return "image";
@@ -120,7 +119,6 @@ function authMiddleware(req, res, next) {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
-app.use("/uploads", express.static(uploadsDir));
 
 // Auth
 app.post("/login", (req, res) => {
@@ -151,21 +149,24 @@ app.get("/get-tickets", async (req, res) => {
   return;
 });
 
-app.post("/upload-file", upload.single("file"), (req, res) => {
+app.post("/upload-file", upload.single("file"), async (req, res) => {
   try {
-    if (req.file) {
-      res.send({
-        url: `/uploads/${req.file.filename}`,
-        name: req.file.originalname,
-        type: attachmentTypeFromMime(req.file.mimetype),
-      });
-    } else {
-      res.send(400);
-    }
+    if (!req.file) return res.status(400).send({ error: "No file" });
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: "boardio", resource_type: "auto" },
+        (error, result) => (error ? reject(error) : resolve(result))
+      );
+      stream.end(req.file.buffer);
+    });
+    res.send({
+      url: result.secure_url,
+      name: req.file.originalname,
+      type: attachmentTypeFromMime(req.file.mimetype),
+    });
   } catch (error) {
-    res.send(error);
+    res.status(500).send(error);
   }
-  return;
 });
 
 app.get("/get-board", (req, res) => {
